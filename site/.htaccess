@@ -1,0 +1,165 @@
+# ==========================================================================
+# Costa Flooring LLC — Apache / LiteSpeed config (Hostinger shared hosting)
+# Static site: HTML + CSS + JS + webp. No PHP.
+# ==========================================================================
+
+# --------------------------------------------------------------------------
+# Basics
+# --------------------------------------------------------------------------
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+ErrorDocument 403 /404.html
+Options -Indexes -MultiViews +FollowSymLinks
+ServerSignature Off
+AddDefaultCharset UTF-8
+
+# --------------------------------------------------------------------------
+# Rewrites: one canonical URL for every page
+#   https, non-www, trailing slash, no /index.html, no .html
+# --------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. Force HTTPS + non-www in a single 301
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://njcostaflooring.com%{REQUEST_URI} [L,R=301,NE]
+
+  # 2. /page/index.html  ->  /page/
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^(.*/)?index\.html$ /%1 [L,R=301,NE]
+
+  # 3. /page.html  ->  /page/   (except 404.html, which Apache serves internally)
+  RewriteCond %{THE_REQUEST} \s/+([^\s?]+)\.html[\s?] [NC]
+  RewriteCond %1 !^404$
+  RewriteRule ^ /%1/ [L,R=301,NE]
+
+  # 4. Folder URLs always end with a slash
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^(.*[^/])$ /$1/ [L,R=301,NE]
+
+  # 5. Strip tracking junk from canonical pages is NOT done here (GTM needs utm_*)
+
+  # 6. Block direct access to source / config files if they ever get uploaded
+  RewriteRule ^(\.git|\.env|tools|node_modules|BRIEF\.md|README\.md|package(-lock)?\.json) - [F,L]
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Hidden and non-web files: never served
+# --------------------------------------------------------------------------
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(py|mjs|md|json|log|sh|bak|orig|sql|zip|ini|yml|yaml|toml)$">
+  Require all denied
+</FilesMatch>
+<Files "robots.txt">
+  Require all granted
+</Files>
+<Files "sitemap.xml">
+  Require all granted
+</Files>
+
+# --------------------------------------------------------------------------
+# MIME types (webp / svg / fonts / manifest)
+# --------------------------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType image/avif .avif
+  AddType image/svg+xml .svg .svgz
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+  AddType application/manifest+json .webmanifest
+  AddType text/javascript .js .mjs
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Compression (Brotli if available, gzip otherwise)
+# --------------------------------------------------------------------------
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json application/xml image/svg+xml
+  # old browsers / proxies
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+  <IfModule mod_headers.c>
+    Header append Vary Accept-Encoding
+  </IfModule>
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Caching
+#   images / fonts: 1 year, immutable (file names change when content changes)
+#   css / js:       1 month
+#   html / xml:     always revalidate, so edits show up right away
+# --------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/xml "access plus 0 seconds"
+  ExpiresByType text/xml "access plus 0 seconds"
+  ExpiresByType text/plain "access plus 0 seconds"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(webp|avif|png|jpe?g|svg|ico|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+# ETags are pointless with far-future expires and break across servers
+<IfModule mod_headers.c>
+  Header unset ETag
+</IfModule>
+FileETag None
+
+# --------------------------------------------------------------------------
+# Security headers
+# --------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # HSTS: 1 year, subdomains, preload-ready (only after HTTPS is confirmed working everywhere)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+  # Content-Security-Policy kept to what won't break GTM, Google Fonts, Maps embed, FormSubmit or Leaflet/OSM
+  Header always set Content-Security-Policy "upgrade-insecure-requests; frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+  Header unset X-Powered-By
+  Header unset Server
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Hotlink protection for photos (allow Google, Facebook, Instagram previews)
+# --------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP_REFERER} !^$
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?njcostaflooring\.com [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://([a-z0-9-]+\.)?(google\.|bing\.|facebook\.|instagram\.|fbcdn\.|yelp\.|nextdoor\.)[a-z.]+ [NC]
+  RewriteRule \.(webp|avif|png|jpe?g)$ - [F,NC]
+</IfModule>
+
+# --------------------------------------------------------------------------
+# Old site URLs -> new pages (add here as you find them in Search Console)
+# --------------------------------------------------------------------------
+# Redirect 301 /old-page   /services/hardwood-floor-refinishing/

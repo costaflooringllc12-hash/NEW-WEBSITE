@@ -1,0 +1,18 @@
+import { chromium } from "playwright";
+const browser = await chromium.launch({ channel: "chrome" }).catch(() => chromium.launch());
+let page = await browser.newPage({ viewport: { width: 1440, height: 700 } });
+await page.goto("http://localhost:8765/", { waitUntil: "networkidle" });
+await page.hover(".nav__item--has-sub > a");
+await page.waitForTimeout(400);
+await page.screenshot({ path: "tools/shots/hdr-drop.png", clip: { x: 0, y: 0, width: 1440, height: 420 } });
+await page.evaluate(() => window.scrollTo(0, 600));
+await page.waitForTimeout(600);
+await page.screenshot({ path: "tools/shots/hdr-solid.png", clip: { x: 0, y: 0, width: 1440, height: 120 } });
+await page.close();
+page = await browser.newPage({ viewport: { width: 390, height: 800 } });
+await page.goto("http://localhost:8765/", { waitUntil: "networkidle" });
+await page.screenshot({ path: "tools/shots/hdr-m.png", clip: { x: 0, y: 0, width: 390, height: 200 } });
+await page.click(".nav-toggle");
+await page.waitForTimeout(400);
+await page.screenshot({ path: "tools/shots/hdr-m-open.png" });
+await browser.close();
