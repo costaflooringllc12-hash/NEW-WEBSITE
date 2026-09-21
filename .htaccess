@@ -1,0 +1,24 @@
+# Repo root = Hostinger public_html. The real web root is public/ — serve from there, hide the rest.
+DirectoryIndex index.html
+Options -Indexes
+ErrorDocument 404 /404.html
+ErrorDocument 403 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Never expose source, tooling or docs
+  RewriteRule ^(tools|node_modules|deploy|\.git|\.github|BRIEF\.md|README\.md|package(-lock)?\.json|\.gitignore|\.htaccess) - [F,L]
+
+  # /public/anything  ->  /anything  (one canonical URL)
+  RewriteCond %{THE_REQUEST} \s/public/([^\s?]*) [NC]
+  RewriteRule ^public/(.*)$ /%1 [R=301,L,NE]
+
+  # Everything else is served from public/ (internal, URL stays clean)
+  RewriteCond %{REQUEST_URI} !^/public/
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "\.(py|mjs|md|json|log|sh|bak|orig|sql|zip|ini|yml|yaml|toml)$">
+  Require all denied
+</FilesMatch>
