@@ -1,17 +1,17 @@
 # Costa Flooring LLC — site
 
-Site estático (HTML + CSS + JS puro). O que vai pro servidor é **só a pasta `site/`**.
+Site estático (HTML + CSS + JS puro). O que vai pro servidor é **só a pasta `public/`**.
 
 ## Estrutura
 ```
-site/                  ← deploy isto (raiz do domínio)
+public/                ← deploy isto (raiz do domínio)
   index.html
   services/…           ← hub + 6 páginas de serviço
   service-areas/  about/  estimate/  thanks/  privacy-policy/  terms/
   404.html  sitemap.xml  robots.txt  favicon.svg
   assets/css/style.css  assets/js/main.js  assets/img/*.webp
 tools/
-  build.py             ← gera site/ a partir de tools/pages/*.html
+  build.py             ← gera public/ a partir de tools/pages/*.html
   shell.py             ← header, footer, contact-bar e sidebar compartilhados (edite aqui)
   pages/*.html         ← conteúdo de cada página + meta JSON no topo
   shots.mjs / peek.mjs ← QA visual com Playwright (screenshots 390/768/1440 + overflow + console)
@@ -28,7 +28,7 @@ tools/
 ## Fotos do cliente
 Originais em `materiasi para o site/` (não vai pro deploy). Fluxo para escolher novas:
 1. `python tools/contact.py` → folhas de contato numeradas em `tools/contact/`
-2. Ajuste a lista `PICK` em `tools/pick.py` e rode → gera `site/assets/img/job-NNN-{480,960}.webp`
+2. Ajuste a lista `PICK` em `tools/pick.py` e rode → gera `public/assets/img/job-NNN-{480,960}.webp`
 3. Adicione o alt em `ALT` (shell.py) e use no `{{WALL:...}}`
 Regra: nada de balde, ferramenta, fita azul, entulho, pé ou obra crua na foto.
 BRIEF.md               ← discovery, dados do cliente, pendências
@@ -40,7 +40,7 @@ BRIEF.md               ← discovery, dados do cliente, pendências
 ## Editar e regerar
 1. Edite `tools/pages/<pagina>.html` (ou header/footer em `tools/build.py`).
 2. `python tools/build.py`
-3. Teste local: `python -m http.server 8765 --directory site` → http://localhost:8765
+3. Teste local: `python -m http.server 8765 --directory public` → http://localhost:8765
 
 ## QA visual
 `node tools/shots.mjs tools/shots` (precisa de `npm install playwright` uma vez).

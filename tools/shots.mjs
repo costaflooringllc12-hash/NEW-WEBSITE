@@ -1,5 +1,5 @@
 // Screenshot QA: node tools/shots.mjs [outDir]
-// Requires the local server: python -m http.server 8765 --directory site
+// Requires the local server: python -m http.server 8765 --directory public
 import { chromium } from "playwright";
 import fs from "node:fs";
 

@@ -1,6 +1,6 @@
 """Static site builder for Costa Flooring.
 Reads tools/pages/*.html (content fragment with a JSON meta comment at top),
-wraps each in the shared shell (tools/shell.py) and writes to site/<url>/index.html.
+wraps each in the shared shell (tools/shell.py) and writes to public/<url>/index.html.
 Run: python tools/build.py
 """
 import json, os, re, datetime, sys
@@ -10,7 +10,7 @@ import shell
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAGES = os.path.join(ROOT, "tools", "pages")
-SITE = os.path.join(ROOT, "site")
+SITE = os.path.join(ROOT, "public")
 BASE_URL = "https://njcostaflooring.com"
 GTM_ID = "GTM-XXXXXXX"  # TODO: replace with the client's real container ID
 

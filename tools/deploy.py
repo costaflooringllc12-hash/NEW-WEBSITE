@@ -4,7 +4,7 @@ Run: python tools/deploy.py  ->  deploy/  and  deploy-costaflooring.zip
 import os, re, shutil, zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SITE = os.path.join(ROOT, "site")
+SITE = os.path.join(ROOT, "public")
 OUT = os.path.join(ROOT, "deploy")
 ZIP = os.path.join(ROOT, "deploy-costaflooring.zip")
 
@@ -37,7 +37,7 @@ for rel in sorted(keep):
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     shutil.copy2(src, dst)
 
-# 4. .htaccess comes from site/.htaccess (already in keep)
+# 4. .htaccess comes from public/.htaccess (already in keep)
 
 # 5. zip
 if os.path.exists(ZIP):
