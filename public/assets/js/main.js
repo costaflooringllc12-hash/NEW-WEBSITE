@@ -171,6 +171,59 @@
     });
   }
 
+  /* ---------- Blog post: reading progress + active section in the table of contents ---------- */
+  var article = document.getElementById("article");
+  var bar = document.querySelector(".read-progress span");
+  if (article && bar) {
+    var pRaf = null;
+    function progress() {
+      pRaf = null;
+      var r = article.getBoundingClientRect();
+      var total = r.height - window.innerHeight;
+      var done = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 1;
+      bar.style.transform = "scaleX(" + done + ")";
+    }
+    window.addEventListener("scroll", function () { if (!pRaf) pRaf = requestAnimationFrame(progress); }, { passive: true });
+    progress();
+  }
+  var tocLinks = document.querySelectorAll(".toc--side a");
+  if (tocLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    tocLinks.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var heads = Object.keys(byId).map(function (id) { return document.getElementById(id); }).filter(Boolean);
+    var to = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        tocLinks.forEach(function (a) { a.classList.remove("is-active"); a.removeAttribute("aria-current"); });
+        var link = byId[en.target.id];
+        if (link) { link.classList.add("is-active"); link.setAttribute("aria-current", "true"); }
+      });
+    }, { rootMargin: "-15% 0px -70% 0px" });
+    heads.forEach(function (h) { to.observe(h); });
+  }
+
+  /* ---------- Blog hub: filter cards by topic (chips stay hidden without JS) ---------- */
+  var chipGroup = document.querySelector("[data-filter-group]");
+  var filterList = document.querySelector("[data-filter-list]");
+  if (chipGroup && filterList) {
+    var chips = chipGroup.querySelectorAll(".chip");
+    var empty = document.querySelector(".filter-empty");
+    function applyFilter(cat) {
+      var shown = 0;
+      chips.forEach(function (c) { c.setAttribute("aria-pressed", String(c.getAttribute("data-filter") === cat)); });
+      filterList.querySelectorAll(".post-card").forEach(function (card) {
+        var on = cat === "all" || card.getAttribute("data-cat") === cat;
+        card.hidden = !on;
+        if (on) shown++;
+      });
+      if (empty) empty.hidden = shown > 0;
+    }
+    chipGroup.hidden = false;
+    chips.forEach(function (c) { c.addEventListener("click", function () { applyFilter(c.getAttribute("data-filter")); }); });
+    var hash = location.hash.slice(1);
+    if (chipGroup.querySelector('[data-filter="' + hash + '"]')) applyFilter(hash);
+  }
+
   /* ---------- Footer year ---------- */
   var y = document.getElementById("year");
   if (y) y.textContent = String(new Date().getFullYear());

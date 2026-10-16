@@ -25,6 +25,18 @@ AddDefaultCharset UTF-8
   RewriteCond %{HTTP_HOST} ^www\. [NC]
   RewriteRule ^ https://njcostaflooring.com%{REQUEST_URI} [L,R=301,NE]
 
+  # 1b. Old WordPress blog URLs (/uncategorized/<post>/) -> /blog/<post>/  (keeps their links and rankings)
+  RewriteRule ^uncategorized/how-hardwood-floor-refinishing-restores-old-floors/?$ /blog/hardwood-floor-refinishing-restores-old-floors/ [R=301,L]
+  RewriteRule ^uncategorized/can-scratched-hardwood-floors-be-fixed[^/]*/?$ /blog/can-scratched-hardwood-floors-be-fixed/ [R=301,L]
+  RewriteRule ^uncategorized/top-hardwood-flooring-trends[^/]*/?$ /blog/hardwood-flooring-trends-westfield-summit-2026/ [R=301,L]
+  RewriteRule ^uncategorized/ditching-carpet-for-hardwood[^/]*/?$ /blog/replace-carpet-with-hardwood-benefits/ [R=301,L]
+  RewriteRule ^uncategorized/replacing-carpet-with-hardwood[^/]*/?$ /blog/replacing-carpet-with-hardwood-nj-cost-timeline/ [R=301,L]
+  RewriteRule ^uncategorized/lvp-vs-hardwood[^/]*/?$ /blog/lvp-vs-hardwood-floors-nj/ [R=301,L]
+  RewriteRule ^uncategorized/dustless-hardwood-refinishing[^/]*/?$ /blog/dustless-hardwood-refinishing-nj/ [R=301,L]
+  RewriteRule ^uncategorized/(the-)?holiday-hosting-countdown[^/]*/?$ /blog/refinish-hardwood-floors-before-holidays-nj/ [R=301,L]
+  RewriteRule ^(uncategorized|category/uncategorized)(/.*)?$ /blog/ [R=301,L]
+  RewriteRule ^blog/feed/?$ /blog/feed.xml [R=301,L]
+
   # 2. /page/index.html  ->  /page/
   RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
   RewriteRule ^(.*/)?index\.html$ /%1 [L,R=301,NE]

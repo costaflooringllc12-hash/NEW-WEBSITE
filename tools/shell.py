@@ -276,6 +276,7 @@ def footer(biz, services, year):
         <li><a href="/#reviews">Reviews</a></li>
         <li><a href="/service-areas/">Service areas</a></li>
         <li><a href="/about/">About</a></li>
+        <li><a href="/blog/">Blog &amp; guides</a></li>
         <li><a href="/estimate/">Free estimate</a></li>
       </ul>
     </div>

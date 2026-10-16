@@ -25,6 +25,14 @@ tools/
 - Páginas de serviço (v2.3) seguem a home: `.hero--page` (foto + kicker + h1 com `<em>`) → split "what's included" → cards `.opt` → timeline walnut → prova (before/after, stain lab, split) → reviews → FAQ → serviços relacionados. Botão em toda dobra.
 - Placeholders nas páginas: `{{ICON:nome}}` (ver `ICONS` em shell.py), `{{RELATED:refinishing,sanding,...}}` (cards de serviço), `{{REVIEWS:whitmore,collier,...}}` (reviews reais), `{{WALL:img,img|img,img}}` (portfólio de 2 fileiras; alt em `ALT` no shell.py)
 
+## Blog (`/blog/`)
+- Posts em `tools/blog/NN-slug.html`: JSON no topo (slug, data, categoria `care`/`install`, title ≤60, description ~155, h1 com `<em>`, excerpt, "quick answer", foto, serviços/reviews/posts relacionados, FAQ) + corpo com `<h2 id="...">`. O sumário, tempo de leitura, schema (BlogPosting + Breadcrumb + FAQPage), OG 1200×630 (`assets/img/og-<slug>.jpg`), feed `blog/feed.xml` e o sitemap saem sozinhos.
+- Template e cards: `tools/blog.py`. Diagramas: `tools/diagrams.py`.
+- Placeholders no corpo: `{{CTA:refinish|repair|install|carpet|compare|dust|holiday}}`, `{{FIG:img|alt|legenda}}`, `{{FIG2:img|alt|img|alt|legenda}}`, `{{BA:hall|stairs}}`, `{{DIAGRAM:nome}}`. Em qualquer página: `{{POSTS:slug,slug,slug}}` (home e páginas de serviço já usam).
+- Post novo: copie um arquivo de `tools/blog/`, troque o JSON e o texto, rode o build. Link interno: todo post linka para o serviço que explica e para 1–2 posts do mesmo cluster; ao publicar, adicione o post no `{{POSTS:...}}` da página de serviço certa.
+- URLs antigas do WordPress (`/uncategorized/...`) já têm 301 em `public/.htaccess`.
+- Fotos: `job-004` = `svc-sanding`, `gal-12` = `job-122`, `job-049` = `ba-install-after` são o mesmo arquivo; não use o par no mesmo post.
+
 ## Fotos do cliente
 Originais em `materiasi para o site/` (não vai pro deploy). Fluxo para escolher novas:
 1. `python tools/contact.py` → folhas de contato numeradas em `tools/contact/`
@@ -45,6 +53,8 @@ BRIEF.md               ← discovery, dados do cliente, pendências
 ## QA visual
 `node tools/shots.mjs tools/shots` (precisa de `npm install playwright` uma vez).
 Páginas específicas: `node tools/shot1.mjs <pasta-saida> /services/ /services/floor-repair/ …` (390 + 1440, força reveal e imagens lazy).
+Componentes: `node tools/elshot.mjs <pasta> <largura> /blog/<slug>/ ".diagram, .post-cta"` (print de cada elemento). Imagens: `node tools/imgcheck.mjs /blog/ …` (lista imagem que não carregou; o `<img src="">` do lightbox aparece sempre, é esperado).
+Obs.: screenshot de página inteira acima de ~16.000px repete blocos (limite do Chrome), não é bug da página.
 
 ## Antes de publicar (pendências)
 - [ ] Trocar `GTM-XXXXXXX` em `tools/build.py` pelo container real e regerar.
